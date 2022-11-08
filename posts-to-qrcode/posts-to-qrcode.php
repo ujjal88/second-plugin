@@ -39,8 +39,19 @@ function pqrc_display_qr_code($content){
 	/**	
 	*	dimenions hook
 	*/
+	$height = get_option('pqrc_height');
+	$width = get_option('pqrc_width');
+	$height = $height ? $height: 180;
+	$width = $width ? $width: 180;
 
-	$dimenions= apply_filters('pqrc_pqrcode_dimenions','150x150');
+	$dimenions= apply_filters('pqrc_qrcode_dimension',"{$height}x{$width}");
+
+	// Dimension Hook
+    $height    = get_option( 'pqrc_height' );
+    $width     = get_option( 'pqrc_width' );
+    $height    = $height ? $height : 180;
+    $width     = $width ? $width : 180;
+    $dimension = apply_filters( 'pqrc_qrcode_dimension', "{$width}x{$height}" );
 
 	/**	
 	*	image attributes
@@ -55,3 +66,83 @@ function pqrc_display_qr_code($content){
 }
 
 add_filter('the_content','pqrc_display_qr_code');
+
+function pqrc_setting_init(){
+
+	add_settings_section('pqrc_section',__('Posts to QR Code','posts-to-qrcode'),'pqrc_section_callback','general');
+
+	add_settings_field('pqrc_height',__('QR Code Hight','posts-to-qrcode'),'pqrc_display_field','general','pqrc_section',array('pqrc_height'));
+	add_settings_field('pqrc_width',__('QR Code width','posts-to-qrcode'),'pqrc_display_field','general','pqrc_section',array('pqrc_width'));
+	// add_settings_field('pqrc_exit',__('QR Code exit','posts-to-qrcode'),'pqrc_display_field','general','pqrc_section',array('pqrc_exit'));
+	add_settings_field('pqrc_select',__('Pqrc DropDown','posts-to-qrcode'),'pqrc_display_select','general','pqrc_section');
+
+	register_setting('general','pqrc_height', array('sanitize_callback' => 'esc_attr'));
+	register_setting('general','pqrc_width', array('sanitize_callback' => 'esc_attr'));
+	// register_setting('general','pqrc_exit', array('sanitize_callback' => 'esc_attr'));
+	register_setting('general','pqrc_select', array('sanitize_callback' => 'esc_attr'));
+}
+
+// function pqrc_display_select(){
+// 	$option = get_option('pqrc_select');
+// 	$country = array(
+// 		'None',
+// 		'India',
+// 		'Bangladesh',
+// 		'Vutan',
+// 		'Neple',
+// 		'Maldip'
+
+// 	);
+// 	printf( "<select id='%s' name='%s' ">, 'pqrc_select', 'pqrc_select');
+// 	$selected = '';
+// 	if ($option == $country )$selected='selected';
+// 	foreach ($country as $country) {
+// 		printf("<option value='%s',%s >%s</option>",'$country','$selected','$country');
+// 	}
+// 	echo "</select>";
+// }
+
+function pqrc_display_select() {
+    $option = get_option( 'pqrc_select' );
+    $country = array(
+		'None',
+		'India',
+		'Bangladesh',
+		'Vutan',
+		'Neple',
+		'Maldip'
+
+	);
+
+    printf( '<select id="%s" name="%s">', 'pqrc_select', 'pqrc_select' );
+    foreach ( $country as $country ) {
+        $selected = '';
+        if ( $option == $country ) {
+            $selected = 'selected';
+        }
+        printf( '<option value="%s" %s>%s</option>', $country, $selected, $country );
+    }
+    echo "</select>";
+}
+
+
+function pqrc_section_callback(){
+	echo "<p>".__('Setting for qr plugin','posts-to-qrcode')."</p>";
+}
+
+function pqrc_display_field($args){
+	$option = get_option($args[0]);
+	printf( "<input type='text' id='%s' name='%s' value='%s'/>", $args[0], $args[0], $option );
+}
+
+// function pqrc_hight_display() {
+//     $height = get_option( 'pqrc_height' );
+//     printf( "<input type='text' id='%s' name='%s' value='%s'/>", 'pqrc_height', 'pqrc_height', $height );
+// }
+
+// function pqrc_width_display() {
+//     $width = get_option( 'pqrc_width' );
+//     printf( "<input type='text' id='%s' name='%s' value='%s'/>", 'pqrc_width', 'pqrc_width', $width );
+// }
+
+add_action("admin_init",'pqrc_setting_init');
